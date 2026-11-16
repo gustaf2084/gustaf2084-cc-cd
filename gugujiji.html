@@ -1,0 +1,1151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>咕咕唧唧 v4.28.0-beta.1</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/misans@4.1.0/lib/Normal/MiSans-Regular.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/misans@4.1.0/lib/Normal/MiSans-Bold.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" integrity="sha384-wcIxkf4k558AjM3Yz3BBFQUbk/zgIYC2R0QpeeYb+TwlBVMrlgLqwRjRtGZiK7ww" crossorigin="anonymous">
+  <style>
+    :root {
+      /* 底色与暖杏纸面 */
+      --bg: #f6efe5;
+      --bg-2: #efe5d6;
+      --card-bg: #fffdf9;
+      --card-bg-2: #fff9f0;
+
+      /* 墨色层次（提高对比度以利群聊缩略图阅读） */
+      --ink-1: #2f2a26;
+      --ink-2: #5e554e;
+      --ink-3: #998e83;
+      --ink-4: #b8ada1;
+
+      /* 主题暖橙与辅助点缀色 */
+      --accent: #ec8b4f;
+      --accent-deep: #cc6628;
+      --accent-2: #e6ad6a;
+      --accent-soft: rgba(236, 139, 79, 0.14);
+      --accent-softer: rgba(236, 139, 79, 0.065);
+      --accent-glow: rgba(236, 139, 79, 0.22);
+
+      /* 语义提示色（用于 Callout 块） */
+      --info-c: #3b82f6;
+      --info-bg: rgba(59, 130, 246, 0.07);
+      --tip-c: #10b981;
+      --tip-bg: rgba(16, 185, 129, 0.07);
+      --important-c: #8b5cf6;
+      --important-bg: rgba(139, 92, 246, 0.07);
+      --warn-c: #f59e0b;
+      --warn-bg: rgba(245, 158, 11, 0.08);
+      --danger-c: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.07);
+
+      /* 线条与代码 */
+      --line: #e8dccb;
+      --line-soft: #f1e8da;
+      --line-strong: #dccbb4;
+      --code-bg: #f5ede0;
+      --code-block-bg: #26221e;
+      --code-block-bar: #1f1c18;
+
+      --radius-lg: 22px;
+      --radius: 14px;
+      --radius-sm: 8px;
+
+      --font-body: "MiSans", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans SC", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+      --font-mono: "JetBrains Mono", "Cascadia Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      color: var(--ink-1);
+      font-family: var(--font-body);
+      font-size: 21px;
+      line-height: 1.78;
+      letter-spacing: 0.01em;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      /* 柔和的暖色纸张背景（不使用 background-attachment:fixed，防止长图截图断层或拉伸） */
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(680px 380px at 92% 0%, rgba(236, 139, 79, 0.15), transparent 70%),
+        radial-gradient(560px 340px at 5% 80px, rgba(230, 173, 106, 0.13), transparent 70%),
+        radial-gradient(rgba(209, 111, 49, 0.055) 1px, transparent 1px),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+      background-size: auto, auto, 20px 20px, auto;
+    }
+
+    /* ── 页面画布（针对手机群聊竖屏预览优化的黄金窄屏宽度） ── */
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 24px 22px 28px;
+    }
+
+    /* ── 顶栏 ─────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 2px 4px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      position: relative;
+      width: 50px;
+      height: 50px;
+      flex: 0 0 auto;
+      border-radius: 16px;
+      background: linear-gradient(145deg, #fff6ea 0%, #ffe3c4 100%);
+      border: 1px solid rgba(236, 139, 79, 0.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      box-shadow:
+        0 8px 18px rgba(209, 111, 49, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    }
+
+    .brand-mark::after {
+      /* 右下角的“在线”状态点 */
+      content: "";
+      position: absolute;
+      right: -3px;
+      bottom: -3px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #4ec468;
+      border: 2.5px solid var(--bg);
+      box-shadow: 0 0 0 1px rgba(78, 196, 104, 0.35);
+    }
+
+    .brand-text {
+      min-width: 0;
+    }
+
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .brand-name {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      line-height: 1.2;
+      color: var(--ink-1);
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--accent-deep);
+      background: var(--accent-soft);
+      border: 1px solid rgba(236, 139, 79, 0.22);
+    }
+
+    .brand-sub {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      color: var(--ink-3);
+      margin-top: 3px;
+    }
+
+    .brand-sub .dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--accent-2);
+    }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--ink-2);
+      background: rgba(255, 253, 249, 0.78);
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    .version-chip {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-deep);
+      background: var(--card-bg);
+      padding: 5px 13px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      box-shadow: 0 3px 10px rgba(209, 111, 49, 0.08);
+      white-space: nowrap;
+    }
+
+    .version-chip::before {
+      content: "";
+      width: 6.5px;
+      height: 6.5px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(236, 139, 79, 0.2);
+    }
+
+    /* ── 内容卡片 ─────────────────────────── */
+    .card {
+      position: relative;
+      background: linear-gradient(180deg, var(--card-bg-2) 0%, var(--card-bg) 140px);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-lg);
+      padding: 32px 30px 30px;
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.9) inset,
+        0 16px 38px rgba(138, 95, 52, 0.09),
+        0 3px 10px rgba(138, 95, 52, 0.05);
+      overflow: hidden;
+    }
+
+    .card::before {
+      /* 顶部暖橙渐变装饰条 */
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 5px;
+      background: linear-gradient(90deg, var(--accent-deep), var(--accent) 45%, var(--accent-2) 85%, #f3c692);
+    }
+
+    .card::after {
+      /* 右上角极淡水印光晕 */
+      content: "";
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(236, 139, 79, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    #content {
+      position: relative;
+      z-index: 1;
+    }
+
+    #content > *:first-child {
+      margin-top: 0;
+    }
+
+    #content > *:last-child {
+      margin-bottom: 0;
+    }
+
+    /* ── 导语（紧跟 h1 的首段）─────────────── */
+    #content > h1:first-child + p {
+      margin-top: 6px;
+      font-size: 1.02em;
+      color: var(--ink-2);
+      padding: 12px 16px;
+      background: var(--accent-softer);
+      border-radius: var(--radius);
+      border: 1px solid var(--line-soft);
+    }
+
+    /* ── 标题 ─────────────────────────────── */
+    h1, h2, h3, h4, h5, h6 {
+      color: var(--ink-1);
+      font-weight: 800;
+      line-height: 1.38;
+      margin: 1.45em 0 0.55em;
+      letter-spacing: -0.01em;
+    }
+
+    h1 {
+      font-size: 1.55em;
+      padding-bottom: 0.35em;
+      border-bottom: 2px solid var(--line-soft);
+      position: relative;
+    }
+
+    h1::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      width: 64px;
+      height: 2px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    h2 {
+      font-size: 1.3em;
+      padding: 3px 12px 3px 15px;
+      position: relative;
+      background: linear-gradient(90deg, var(--accent-softer), transparent 85%);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+
+    h2::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.16em;
+      bottom: 0.16em;
+      width: 5px;
+      border-radius: 3px;
+      background: linear-gradient(180deg, var(--accent-deep), var(--accent-2));
+    }
+
+    h3 {
+      font-size: 1.15em;
+      padding-left: 15px;
+      position: relative;
+    }
+
+    h3::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.42em;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      border: 2px solid var(--accent);
+    }
+
+    h4, h5, h6 {
+      font-size: 1.03em;
+      color: var(--ink-2);
+    }
+
+    /* ── 段落与行内元素 ───────────────────── */
+    p {
+      margin: 0.78em 0;
+    }
+
+    strong {
+      color: var(--accent-deep);
+      font-weight: 700;
+    }
+
+    em {
+      color: var(--ink-2);
+      font-style: italic;
+    }
+
+    del {
+      color: var(--ink-3);
+      text-decoration-color: var(--accent);
+    }
+
+    a {
+      color: var(--accent-deep);
+      text-decoration: none;
+      border-bottom: 1.5px solid rgba(204, 102, 40, 0.32);
+      padding-bottom: 0.5px;
+      overflow-wrap: anywhere;
+    }
+
+    mark {
+      background: linear-gradient(180deg, transparent 52%, rgba(236, 139, 79, 0.36) 52%);
+      color: inherit;
+      padding: 0 3px;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: var(--font-mono);
+      font-size: 0.78em;
+      line-height: 1;
+      padding: 3px 7px;
+      border-radius: 6px;
+      color: var(--ink-1);
+      background: #fff;
+      border: 1px solid var(--line-strong);
+      box-shadow: 0 2px 0 var(--line);
+      white-space: nowrap;
+    }
+
+    sub, sup { font-size: 0.72em; }
+
+    hr {
+      border: none;
+      height: 1px;
+      margin: 1.6em 0;
+      background: repeating-linear-gradient(90deg, var(--line-strong) 0 8px, transparent 8px 15px);
+    }
+
+    /* ── 图片 ─────────────────────────────── */
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 1em auto;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      box-shadow: 0 6px 18px rgba(151, 107, 63, 0.10);
+    }
+
+    /* Emoji 或行内小图标保持行内对齐 */
+    p > img:only-child {
+      display: block;
+    }
+
+    /* ── 引用块与 Callout 提示框 ──────────── */
+    blockquote {
+      position: relative;
+      margin: 1em 0;
+      padding: 12px 16px 12px 18px;
+      border-radius: 4px var(--radius) var(--radius) 4px;
+      background: var(--accent-softer);
+      border: 1px solid rgba(236, 139, 79, 0.16);
+      border-left: 4px solid var(--accent);
+      color: var(--ink-2);
+    }
+
+    blockquote > :first-child { margin-top: 0; }
+    blockquote > :last-child { margin-bottom: 0; }
+
+    blockquote blockquote {
+      margin: 0.55em 0;
+      background: rgba(236, 139, 79, 0.05);
+    }
+
+    /* GitHub 风格 Callouts (> [!NOTE] 等) */
+    .callout {
+      margin: 1em 0;
+      padding: 12px 16px;
+      border-radius: 6px var(--radius) var(--radius) 6px;
+      border: 1px solid var(--line);
+      border-left-width: 4.5px;
+    }
+
+    .callout-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 800;
+      font-size: 0.92em;
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+
+    .callout-body > :first-child { margin-top: 0; }
+    .callout-body > :last-child { margin-bottom: 0; }
+
+    .callout--note { background: var(--info-bg); border-color: rgba(59, 130, 246, 0.22); border-left-color: var(--info-c); }
+    .callout--note .callout-title { color: #2563eb; }
+
+    .callout--tip { background: var(--tip-bg); border-color: rgba(16, 185, 129, 0.22); border-left-color: var(--tip-c); }
+    .callout--tip .callout-title { color: #059669; }
+
+    .callout--important { background: var(--important-bg); border-color: rgba(139, 92, 246, 0.22); border-left-color: var(--important-c); }
+    .callout--important .callout-title { color: #7c3aed; }
+
+    .callout--warning { background: var(--warn-bg); border-color: rgba(245, 158, 11, 0.26); border-left-color: var(--warn-c); }
+    .callout--warning .callout-title { color: #d97706; }
+
+    .callout--caution { background: var(--danger-bg); border-color: rgba(239, 68, 68, 0.22); border-left-color: var(--danger-c); }
+    .callout--caution .callout-title { color: #dc2626; }
+
+    /* ── 行内代码 ─────────────────────────── */
+    :not(pre) > code {
+      font-family: var(--font-mono);
+      font-size: 0.84em;
+      padding: 0.14em 0.42em;
+      margin: 0 1px;
+      border-radius: 6px;
+      background: var(--code-bg);
+      color: var(--accent-deep);
+      border: 1px solid var(--line);
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    /* ── 代码块（自动折行防截断） ─────────── */
+    .code-block {
+      margin: 1.05em 0;
+      border-radius: 13px;
+      overflow: hidden;
+      background: var(--code-block-bg);
+      border: 1px solid rgba(43, 39, 35, 0.18);
+      box-shadow: 0 8px 22px rgba(43, 39, 35, 0.18);
+    }
+
+    .code-block__bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: var(--code-block-bar);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .code-block__dots {
+      display: inline-flex;
+      gap: 6px;
+    }
+
+    .code-block__dots i {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      display: block;
+    }
+
+    .code-block__dots i:nth-child(1) { background: #ff5f56; }
+    .code-block__dots i:nth-child(2) { background: #ffbd2e; }
+    .code-block__dots i:nth-child(3) { background: #27c93f; }
+
+    .code-block__meta {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: rgba(232, 227, 218, 0.62);
+    }
+
+    .code-block__lang {
+      text-transform: uppercase;
+      color: #f0b686;
+    }
+
+    .code-block__lines {
+      color: rgba(232, 227, 218, 0.42);
+      font-weight: 500;
+    }
+
+    /* 静态文转图中代码块必须自动换行，避免横向滚动条吃掉右侧代码 */
+    pre {
+      max-width: 100%;
+      background: var(--code-block-bg);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin: 1.05em 0;
+      line-height: 1.62;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      overflow-x: hidden;
+      tab-size: 2;
+    }
+
+    .code-block pre {
+      margin: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+
+    pre > code {
+      display: block;
+      padding: 0;
+      background: transparent;
+      border: none;
+      color: #ebe5dc;
+      font-family: var(--font-mono);
+      font-size: 0.76em;
+      line-height: inherit;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    pre.shiki,
+    .code-block pre.shiki {
+      padding: 14px 18px;
+      white-space: pre-wrap !important;
+      overflow-wrap: anywhere !important;
+      word-break: break-word !important;
+      overflow-x: hidden !important;
+    }
+
+    pre.shiki > code {
+      color: inherit;
+      background: transparent !important;
+      white-space: pre-wrap !important;
+      overflow-wrap: anywhere !important;
+      word-break: break-word !important;
+    }
+
+    /* ── 列表 ─────────────────────────────── */
+    ul, ol {
+      padding-left: 1.42em;
+      margin: 0.72em 0;
+    }
+
+    li {
+      margin: 0.32em 0;
+      padding-left: 0.1em;
+    }
+
+    li > p {
+      margin: 0.28em 0;
+    }
+
+    li > ul,
+    li > ol {
+      margin: 0.28em 0;
+    }
+
+    li::marker {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* 任务列表 */
+    li.task-list-item,
+    li:has(> input[type="checkbox"]) {
+      list-style: none;
+      margin-left: -1.25em;
+      padding-left: 0;
+    }
+
+    input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 1.02em;
+      height: 1.02em;
+      margin: 0 0.48em 0 0;
+      vertical-align: -0.15em;
+      border: 1.8px solid var(--accent);
+      border-radius: 5px;
+      background: #fff;
+      position: relative;
+    }
+
+    input[type="checkbox"]:checked {
+      background: var(--accent);
+    }
+
+    input[type="checkbox"]:checked::after {
+      content: "";
+      position: absolute;
+      left: 0.3em;
+      top: 0.1em;
+      width: 0.24em;
+      height: 0.48em;
+      border: solid #fff;
+      border-width: 0 0.16em 0.16em 0;
+      transform: rotate(42deg);
+    }
+
+    /* ── 表格（圆角独立边框 + 自动断词防截断） ── */
+    .table-wrap {
+      width: 100%;
+      margin: 1.05em 0;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid var(--line-strong);
+      box-shadow: 0 4px 14px rgba(151, 107, 63, 0.06);
+      background: var(--card-bg);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0;
+      font-size: 0.85em;
+      line-height: 1.52;
+    }
+
+    /* 兼容未被包裹的裸 table */
+    #content > table {
+      margin: 1.05em 0;
+      border: 1px solid var(--line-strong);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    thead {
+      background: linear-gradient(180deg, var(--accent-soft), var(--accent-softer));
+      color: var(--accent-deep);
+      text-align: left;
+    }
+
+    th {
+      font-weight: 800;
+      border-bottom: 1.5px solid var(--line-strong);
+    }
+
+    th, td {
+      padding: 9px 13px;
+      border-bottom: 1px solid var(--line-soft);
+      vertical-align: top;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+
+    th + th,
+    td + td {
+      border-left: 1px solid var(--line-soft);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:nth-child(even) {
+      background: var(--accent-softer);
+    }
+
+    /* ── 折叠块（文转图默认展开展示） ──────── */
+    details {
+      margin: 1em 0;
+      padding: 11px 16px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--card-bg-2);
+    }
+
+    details[open] {
+      box-shadow: 0 4px 14px rgba(151, 107, 63, 0.06);
+    }
+
+    details summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--accent-deep);
+      list-style: none;
+    }
+
+    details[open] summary {
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed var(--line);
+    }
+
+    details summary::-webkit-details-marker { display: none; }
+
+    details summary::before {
+      content: "▸";
+      display: inline-block;
+      margin-right: 7px;
+      color: var(--accent);
+      transition: transform 0.2s;
+    }
+
+    details[open] summary::before {
+      transform: rotate(90deg);
+    }
+
+    /* ── KaTeX 数学公式 ───────────────────── */
+    .katex {
+      font-size: 1.04em;
+    }
+
+    .katex-display {
+      max-width: 100%;
+      margin: 0.95em 0;
+      padding: 6px 4px;
+      overflow-x: hidden;
+      overflow-y: hidden;
+    }
+
+    /* ── 纯文本降级 ───────────────────────── */
+    .fallback-text {
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: var(--font-body);
+      font-size: 1em;
+      line-height: 1.78;
+      color: var(--ink-1);
+      background: transparent;
+      padding: 0;
+      margin: 0;
+    }
+
+    .fallback-text > code { all: unset; }
+
+    /* ── 页脚 ─────────────────────────────── */
+    .footer {
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 6px;
+      font-size: 12.5px;
+      color: var(--ink-3);
+      letter-spacing: 0.02em;
+    }
+
+    .footer-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      color: var(--ink-2);
+    }
+
+    .footer-paw {
+      color: var(--accent);
+      font-size: 13px;
+    }
+
+    .footer-divider {
+      flex: 1 1 auto;
+      height: 1px;
+      background: linear-gradient(90deg, var(--line), rgba(232, 220, 203, 0.25));
+    }
+
+    .footer-right {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      color: var(--ink-3);
+    }
+
+    /* ── 超窄屏适配 ───────────────────────── */
+    @media (max-width: 560px) {
+      body { font-size: 19px; }
+      .page { padding: 16px 12px 22px; }
+      .card { padding: 24px 20px 22px; }
+      .brand-name { font-size: 21px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div class="brand">
+        <div class="brand-mark">🐥</div>
+        <div class="brand-text">
+          <div class="brand-title-row">
+            <span class="brand-name">咕咕唧唧</span>
+            <span class="brand-badge">群聊小助手</span>
+          </div>
+          <div class="brand-sub">
+            <span>AI 智能回复</span>
+            <span class="dot"></span>
+            <span>Powered by AstrBot</span>
+          </div>
+        </div>
+      </div>
+      <div class="header-meta">
+        <span class="meta-chip" id="char-count-chip" hidden></span>
+        <span class="version-chip">v4.28.0-beta.1</span>
+      </div>
+    </header>
+
+    <main class="card">
+      <article id="content"></article>
+    </main>
+
+    <footer class="footer">
+      <span class="footer-brand">
+        <span class="footer-paw">✦</span>
+        <span>咕咕唧唧 · AstrBot v4.28.0-beta.1</span>
+      </span>
+      <span class="footer-divider"></span>
+      <span class="footer-right" id="footer-meta">群聊图文卡片</span>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js" integrity="sha384-hIoBPJpTUs74ddyc4bFZSM1TVlQDA60VBbJS0oA934VSz82sBx1X7kSx2ATBDIyd" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous"></script>
+  <textarea id="markdown-source" hidden>你好，我是咕咕唧唧，这个群里的 AI 小助手。
+
+平时可以在群里 @ 我，找我聊天、问问题，或者让我帮你查东西。长一点的回答，我会排版成这种图文卡片发出来，方便大家阅读。
+
+## 我能做什么
+
+- **聊天**：随便聊聊，有问必答
+- **查资料**：帮你找点有用的信息
+- **图文卡片**：长回答自动变成好看的卡片
+
+> 在群里 @咕咕唧唧，我随时都在。</textarea>
+  <script>
+    (function () {
+      const contentElement = document.getElementById("content");
+      const source = (document.getElementById("markdown-source").value || "").trim();
+
+      function escapeHtml(value) {
+        return String(value == null ? "" : value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;");
+      }
+
+      // 更新顶栏字数与底栏时间元信息
+      function updateMetaInfo(rawText) {
+        try {
+          const clean = rawText
+            .replace(/```[\s\S]*?```/g, "")
+            .replace(/[#>*_`~\-\[\]()!]/g, "")
+            .replace(/\s+/g, "");
+          const count = clean.length || rawText.length;
+          const chip = document.getElementById("char-count-chip");
+          if (chip && count > 0) {
+            chip.textContent = count + " 字";
+            chip.hidden = false;
+          }
+
+          const now = new Date();
+          const pad = (n) => String(n).padStart(2, "0");
+          const timeStr =
+            now.getFullYear() + "-" +
+            pad(now.getMonth() + 1) + "-" +
+            pad(now.getDate()) + " " +
+            pad(now.getHours()) + ":" +
+            pad(now.getMinutes());
+          const footerMeta = document.getElementById("footer-meta");
+          if (footerMeta) {
+            footerMeta.textContent = timeStr;
+          }
+        } catch (e) { /* 忽略元信息异常 */ }
+      }
+
+      // 保护数学公式不被 marked 拆散（如公式中的 _ 或 \\ 被转义）
+      function parseMarkdownSafe(raw) {
+        const mathBlocks = [];
+        const stash = (match) => {
+          const id = "\u0000MATH_" + mathBlocks.length + "\u0000";
+          mathBlocks.push(match);
+          return id;
+        };
+
+        // 暂存代码块外的 $$...$$ 与 \[...\] 及行内 $...$
+        const codeBlocks = [];
+        let working = raw.replace(/```[\s\S]*?```|`[^`\n]+`/g, (m) => {
+          const id = "\u0000CODE_" + codeBlocks.length + "\u0000";
+          codeBlocks.push(m);
+          return id;
+        });
+
+        working = working
+          .replace(/\$\$[\s\S]+?\$\$/g, stash)
+          .replace(/\\\[[\s\S]+?\\\]/g, stash)
+          .replace(/\\\([\s\S]+?\\\)/g, stash)
+          .replace(/\$(?!\s)([^$\n]+?)(?<!\s)\$/g, stash);
+
+        working = working.replace(/\u0000CODE_(\d+)\u0000/g, (_, idx) => codeBlocks[Number(idx)]);
+
+        // 开启 breaks: true，使 AI 常用的单换行正常折行而不粘连
+        marked.setOptions({ gfm: true, breaks: true });
+        let html = marked.parse(working);
+
+        html = html.replace(/\u0000MATH_(\d+)\u0000/g, (_, idx) => escapeHtml(mathBlocks[Number(idx)]));
+        return html;
+      }
+
+      // marked 未加载（受限网络 / CDN 不可达）时的轻量 Markdown 兜底
+      function renderFallback() {
+        contentElement.innerHTML =
+          '<pre class="fallback-text">' + escapeHtml(source) + "</pre>";
+      }
+
+      function extractLanguage(codeElement) {
+        const match = (codeElement.className || "").match(/language-([\w+#.-]+)/i);
+        return match ? match[1].toLowerCase() : "";
+      }
+
+      // 为代码块套上带“窗口红绿灯 + 语言标签 + 行数”的外壳
+      function enhanceCodeBlocks(root) {
+        const codeNodes = Array.from(root.querySelectorAll("pre > code"));
+        const metaList = codeNodes.map((codeEl) => {
+          const lang = extractLanguage(codeEl);
+          const rawCode = (codeEl.textContent || "").replace(/\n$/, "");
+          const lines = rawCode ? rawCode.split("\n").length : 1;
+          return { lang, lines };
+        });
+
+        if (window.AstrBotT2IShiki) {
+          try {
+            window.AstrBotT2IShiki.highlightAllCodeBlocks(root, "github-dark");
+          } catch (e) { /* 高亮失败不影响主体 */ }
+        }
+
+        Array.from(root.querySelectorAll("pre")).forEach((preElement, index) => {
+          if (preElement.closest(".code-block")) return;
+
+          const info = metaList[index] || { lang: "", lines: 1 };
+          const langLabel = info.lang || "text";
+          const lineLabel = info.lines > 1 ? info.lines + " lines" : "1 line";
+
+          const wrapper = document.createElement("div");
+          wrapper.className = "code-block";
+          wrapper.innerHTML =
+            '<div class="code-block__bar">' +
+              '<span class="code-block__dots"><i></i><i></i><i></i></span>' +
+              '<span class="code-block__meta">' +
+                '<span class="code-block__lang">' + escapeHtml(langLabel) + "</span>" +
+                '<span class="code-block__lines">' + escapeHtml(lineLabel) + "</span>" +
+              "</span>" +
+            "</div>";
+
+          preElement.replaceWith(wrapper);
+          wrapper.appendChild(preElement);
+        });
+      }
+
+      // 将 GitHub 风格 > [!NOTE] 等引用转换为 Callout 提示框
+      function enhanceCallouts(root) {
+        const calloutMap = {
+          note: { icon: "💡", label: "提示 · NOTE" },
+          tip: { icon: "✨", label: "技巧 · TIP" },
+          important: { icon: "📌", label: "重要 · IMPORTANT" },
+          warning: { icon: "⚠️", label: "注意 · WARNING" },
+          caution: { icon: "🚨", label: "警告 · CAUTION" }
+        };
+
+        Array.from(root.querySelectorAll("blockquote")).forEach((bq) => {
+          const firstP = bq.querySelector(":scope > p:first-child");
+          if (!firstP) return;
+
+          const match = firstP.innerHTML.match(/^\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\](?:[ \t]+([^\n<]*))?(?:<br\s*\/?>|\n|$)/i);
+          if (!match) return;
+
+          const type = match[1].toLowerCase();
+          const customTitle = (match[2] || "").trim();
+          const cfg = calloutMap[type] || calloutMap.note;
+
+          firstP.innerHTML = firstP.innerHTML.slice(match[0].length).trim();
+          if (!firstP.innerHTML) {
+            firstP.remove();
+          }
+
+          const callout = document.createElement("div");
+          callout.className = "callout callout--" + type;
+
+          const titleEl = document.createElement("div");
+          titleEl.className = "callout-title";
+          titleEl.textContent = cfg.icon + " " + (customTitle || cfg.label);
+
+          const bodyEl = document.createElement("div");
+          bodyEl.className = "callout-body";
+          while (bq.firstChild) {
+            bodyEl.appendChild(bq.firstChild);
+          }
+
+          callout.appendChild(titleEl);
+          callout.appendChild(bodyEl);
+          bq.replaceWith(callout);
+        });
+      }
+
+      // 为表格套上圆角容器并自适应宽表格字号，静态图自动展开 details
+      function enhanceTablesAndDetails(root) {
+        Array.from(root.querySelectorAll("table")).forEach((table) => {
+          if (table.parentElement && table.parentElement.classList.contains("table-wrap")) return;
+          const wrap = document.createElement("div");
+          wrap.className = "table-wrap";
+          table.replaceWith(wrap);
+          wrap.appendChild(table);
+
+          const cols = table.querySelectorAll("thead th, tr:first-child td").length;
+          if (cols >= 5) {
+            table.style.fontSize = "0.78em";
+          }
+        });
+
+        // 静态图片无法点击交互，默认展开所有折叠块
+        Array.from(root.querySelectorAll("details")).forEach((det) => {
+          det.setAttribute("open", "");
+        });
+      }
+
+      // 自动缩放超宽数学公式，避免截断或出现滚动条
+      function fitWideMath(root) {
+        Array.from(root.querySelectorAll(".katex-display")).forEach((displayEl) => {
+          const availableWidth = displayEl.clientWidth;
+          const renderedWidth = displayEl.scrollWidth;
+          if (availableWidth > 0 && renderedWidth > availableWidth) {
+            const fontSize = parseFloat(window.getComputedStyle(displayEl).fontSize);
+            const fitted = Math.max(12, fontSize * (availableWidth / renderedWidth) * 0.97);
+            displayEl.style.fontSize = fitted + "px";
+          }
+        });
+      }
+
+      updateMetaInfo(source);
+
+      try {
+        if (typeof marked === "undefined") {
+          renderFallback();
+          return;
+        }
+
+        contentElement.innerHTML = parseMarkdownSafe(source);
+
+        enhanceCallouts(contentElement);
+        enhanceCodeBlocks(contentElement);
+        enhanceTablesAndDetails(contentElement);
+
+        if (window.renderMathInElement) {
+          try {
+            window.renderMathInElement(contentElement, {
+              delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "\\[", right: "\\]", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false }
+              ],
+              throwOnError: false
+            });
+            fitWideMath(contentElement);
+            window.addEventListener("load", () => fitWideMath(contentElement), { once: true });
+          } catch (e) { /* 公式渲染失败不影响主体 */ }
+        }
+      } catch (err) {
+        renderFallback();
+      }
+    })();
+  </script>
+</body>
+</html>
